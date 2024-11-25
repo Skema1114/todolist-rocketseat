@@ -58,6 +58,6 @@ Foi configurado um **Dockerfile** para facilitar o processo de deploy, garantind
 
 Certifique-se de que você possui os seguintes pré-requisitos instalados:
 
-- Java 17
-- Maven
-- Docker (caso queira rodar o projeto em contêineres)
+- **Java 17**
+- **Maven**
+- **Docker** (caso queira rodar o projeto em contêineres)
