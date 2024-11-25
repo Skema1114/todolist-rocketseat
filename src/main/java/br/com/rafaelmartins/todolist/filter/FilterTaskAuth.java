@@ -22,27 +22,33 @@ public class FilterTaskAuth extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		var authorization = request.getHeader("Authorization");
-		var encodedAuth = authorization.substring("Basic".length()).trim();
+		var servletPath = request.getServletPath();
+		if (servletPath.startsWith("/tasks/")) {
+			var authorization = request.getHeader("Authorization");
+			var encodedAuth = authorization.substring("Basic".length()).trim();
 
-		byte[] decodedAuth = Base64.getDecoder().decode(encodedAuth);
-		var stringAuth = new String(decodedAuth);
+			byte[] decodedAuth = Base64.getDecoder().decode(encodedAuth);
+			var stringAuth = new String(decodedAuth);
 
-		String[] credentials = stringAuth.split(":");
-		String username = credentials[0];
-		String password = credentials[1];
+			String[] credentials = stringAuth.split(":");
+			String username = credentials[0];
+			String password = credentials[1];
 
-		var user = this.userRepository.findByUsername(username);
-		if (user == null) {
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-		} else {
-			var passwordVerify = BCrypt.verifyer().verify(password.toCharArray(), user.getPassword().toCharArray());
-			if (passwordVerify.verified) {
-				filterChain.doFilter(request, response);
-			} else {
+
+			var user = this.userRepository.findByUsername(username);
+			if (user == null) {
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+			} else {
+				var passwordVerify = BCrypt.verifyer().verify(password.toCharArray(), user.getPassword());
+				if (passwordVerify.verified) {
+					request.setAttribute("idUser", user.getId());
+					filterChain.doFilter(request, response);
+				} else {
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				}
 			}
+		} else {
+			filterChain.doFilter(request, response);
 		}
-
 	}
 }

@@ -49,9 +49,9 @@ public class UserController {
         }
 
         var passwordHashed = BCrypt.withDefaults().hashToString(12, user.getPassword().toCharArray());
-        var userCreated = this.userRepository.save(user);
-
         user.setPassword(passwordHashed);
+
+        var userCreated = this.userRepository.save(user);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
     }
